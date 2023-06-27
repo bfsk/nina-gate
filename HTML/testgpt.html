@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pozivnica gostima</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #666;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .location-tracking-info {
+      color: #999;
+      font-size: 16px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Dobrodošli u rezidenciju Sarajlić!</h1>
+    <p>Hvala što koristite našu aplikaciju za pozivanje gostiju. Pratimo vašu lokaciju sljedećih 45 minuta kako bismo bili sigurni da ste sigurno stigli na adresu Pijačna 94.</p>
+    <p style="color: green; font-weight: bold;">Kada stignete na lokaciju, kapija/rampa bi se trebala automatski otvoriti.</p>
+    <p>Napominjemo da praćenje lokacije nije opasno i da je vaša privatnost naš glavni prioritet.</p>
+    <p>Praćenje će se automatski zaustaviti nakon 45 minuta ili ako zatvorite ovu karticu/prozor preglednika.</p>
+    <div class="location-tracking-info">
+        <p><strong>Trenutne GPS koordinate:</strong> 
+            <p id="position"></p>
+        </p>
+        <p><strong>Procijenjena zračna udaljenost od odredišta:</strong> 
+            <p id="dist"></p>
+        </p>
+    </div>
+  </div>
+
+
+
+
+  <script>
+
+ 
+
+    var x = document.getElementById("position");
+    var xd = document.getElementById("dist");
+
+    const latit = 44.135410;
+    const longit = 18.628323;
+
+    let distance = 0;
+
+    const myTimeout = setInterval(getLocation, 2000);
+
+    
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+      } else { 
+        x.innerHTML = "Geolocation is not supported by this browser.";
+      }
+    }
+    
+    function showPosition(position) {
+      x.innerHTML = "Latitude: " + position.coords.latitude + 
+      "<br>Longitude: " + position.coords.longitude;
+
+      distance = calculateDistance(latit, longit, position.coords.latitude, position.coords.longitude);
+      xd.innerHTML = (distance * 1000).toFixed(2) + " metara";
+      if(distance*1000 <= 10){
+        fetch('https://nina-gate.ngrok-free.app/gate/open-test');
+      }
+    }
+
+
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+  // Convert latitude and longitude to radians
+  const latRad1 = toRadians(lat1);
+  const lonRad1 = toRadians(lon1);
+  const latRad2 = toRadians(lat2);
+  const lonRad2 = toRadians(lon2);
+
+  // Radius of the Earth (in kilometers)
+  const radius = 6371;
+
+  // Haversine formula
+  const dlon = lonRad2 - lonRad1;
+  const dlat = latRad2 - latRad1;
+  const a = Math.sin(dlat / 2) ** 2 + Math.cos(latRad1) * Math.cos(latRad2) * Math.sin(dlon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = radius * c;
+
+  return distance;
+}
+
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
+}
+
+    </script>
+</body>
+</html>
